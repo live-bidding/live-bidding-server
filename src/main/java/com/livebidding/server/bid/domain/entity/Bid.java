@@ -54,6 +54,12 @@ public class Bid {
     }
 
     public static Bid of(Long price, User bidder, Product product) {
+        if (bidder == null) {
+            throw new IllegalArgumentException("[ERROR] 입찰자는 null일 수 없습니다.");
+        }
+        if (product == null) {
+            throw new IllegalArgumentException("[ERROR] 입찰 상품은 null일 수 없습니다.");
+        }
         return new Bid(
                 Price.from(price),
                 bidder,
