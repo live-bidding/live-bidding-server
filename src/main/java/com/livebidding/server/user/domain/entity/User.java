@@ -38,10 +38,10 @@ public class User {
         this.name = name;
     }
 
-    public static User of(final String email, final String password, final String name) {
+    public static User of(final String email, final String encodedPassword, final String name) {
         return new User(
                 Email.from(email),
-                Password.from(password),
+                Password.fromEncoded(encodedPassword),
                 Username.from(name)
         );
     }
