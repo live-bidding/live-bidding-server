@@ -4,6 +4,7 @@ import com.livebidding.server.user.exception.UserErrorCode;
 import com.livebidding.server.user.exception.UserException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -38,7 +39,7 @@ public class Email {
         if (!StringUtils.hasText(value)) {
             throw new UserException(UserErrorCode.INVALID_EMAIL_FORMAT);
         }
-        return value.trim().toLowerCase();
+        return value.trim().toLowerCase(Locale.ROOT);
     }
 
     private void validateFormat(final String value) {

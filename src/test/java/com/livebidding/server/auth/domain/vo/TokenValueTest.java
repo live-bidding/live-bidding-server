@@ -8,53 +8,49 @@ import com.livebidding.server.auth.exception.AuthException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class TokenValueTest {
 
-    @Test
-    @DisplayName("유효한 토큰 값으로 TokenValue 객체를 생성한다")
-    void create_tokenValue_successfully() {
-        // given
-        String validToken = "a.b.c";
+	@DisplayName("raw 토큰을 해싱하여 TokenValue 객체를 생성한다.")
+	@Test
+	void createHashedTokenValue() {
+		// given
+		String rawToken = "test-token-1234";
 
-        // when
-        TokenValue tokenValue = TokenValue.from(validToken);
+		// when
+		TokenValue tokenValue = TokenValue.hashed(rawToken);
 
-        // then
-        assertThat(tokenValue).isNotNull();
-        assertThat(tokenValue.getValue()).isEqualTo(validToken);
-    }
+		// then
+		assertThat(tokenValue).isNotNull();
+		assertThat(tokenValue.getValue()).isNotEqualTo(rawToken);
+		assertThat(tokenValue.getValue()).hasSize(64); // SHA-256 hex string length
+	}
 
-    @ParameterizedTest
-    @ValueSource(strings = {"", "  "})
-    @DisplayName("토큰 값이 비어있거나 공백이면 예외를 던진다")
-    void throw_exception_when_value_is_blank(String blankToken) {
-        // when & then
-        assertThatThrownBy(() -> TokenValue.from(blankToken))
-            .isInstanceOf(AuthException.class)
-            .hasFieldOrPropertyWithValue("errorCode", AuthErrorCode.INVALID_JWT_TOKEN);
-    }
+	@DisplayName("null, 비어있거나 공백으로만 이루어진 raw 토큰으로 해싱하면 예외가 발생한다.")
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "   "})
+	void createHashedTokenWithBlankValue(String blankToken) {
+		// when & then
+		assertThatThrownBy(() -> TokenValue.hashed(blankToken))
+				.isInstanceOf(AuthException.class)
+				.extracting("errorCode")
+				.isEqualTo(AuthErrorCode.INVALID_JWT_TOKEN);
+	}
 
-    @Test
-    @DisplayName("토큰 값이 null이면 예외를 던진다")
-    void throw_exception_when_value_is_null() {
-        // when & then
-        assertThatThrownBy(() -> TokenValue.from(null))
-            .isInstanceOf(AuthException.class)
-            .hasFieldOrPropertyWithValue("errorCode", AuthErrorCode.INVALID_JWT_TOKEN);
-    }
+	@DisplayName("일반 문자열로 TokenValue 객체를 생성한다.")
+	@Test
+	void createTokenValueFromPlainString() {
+		// given
+		String value = "some-plain-value";
 
-    @Test
-    @DisplayName("같은 값을 가진 TokenValue 객체는 동등하다")
-    void objects_with_same_value_are_equal() {
-        // given
-        String token = "a.b.c";
-        TokenValue tokenValue1 = TokenValue.from(token);
-        TokenValue tokenValue2 = TokenValue.from(token);
+		// when
+		TokenValue tokenValue = TokenValue.from(value);
 
-        // when & then
-        assertThat(tokenValue1).isEqualTo(tokenValue2);
-        assertThat(tokenValue1.hashCode()).isEqualTo(tokenValue2.hashCode());
-    }
+		// then
+		assertThat(tokenValue.getValue()).isEqualTo(value);
+	}
+
 }

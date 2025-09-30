@@ -1,0 +1,6 @@
+refactor: 코드 리뷰 피드백 반영 및 테스트 개선
+
+- `Email.java`: 코드 리뷰 피드백을 반영하여, 로캘(locale)에 독립적인 `toLowerCase(Locale.ROOT)`를 사용하도록 이메일 정규화 로직을 개선했습니다.
+- `RefreshTokenTest.java`: `updateToken` 테스트가 상태 변경을 명확히 검증하도록 수정하여 잠재적인 회귀 문제를 방지합니다.
+- `EmailTest`, `TokenValueTest`: `null`, 빈 값, 공백 값에 대한 테스트 케이스를 추가하여 값 객체의 유효성 검증 로직을 강화했습니다.
+- `Email.java`에서 누락되었던 패키지 선언을 복구하여 빌드 오류를 해결했습니다.

@@ -34,11 +34,14 @@ class RefreshTokenTest {
         RefreshToken refreshToken = RefreshToken.of(user, "old.token.value");
         String newRawTokenValue = "new.token.value";
 
+        String previousHashedValue = refreshToken.getTokenValue().getValue();
+
         // when
         refreshToken.updateToken(newRawTokenValue);
 
         // then
         assertThat(refreshToken.getTokenValue()).isNotNull();
         assertThat(refreshToken.getTokenValue().getValue()).isNotEqualTo(newRawTokenValue);
+        assertThat(refreshToken.getTokenValue().getValue()).isNotEqualTo(previousHashedValue);
     }
 }
