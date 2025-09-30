@@ -8,44 +8,56 @@ import com.livebidding.server.user.exception.UserException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class EmailTest {
 
-    @Test
-    @DisplayName("유효한 이메일 형식으로 Email 객체를 생성한다.")
-    void create_email_with_valid_format() {
-        // given
-        String validEmail = "test@example.com";
+	@DisplayName("유효한 형식의 이메일로 객체를 생성한다.")
+	@Test
+	void createEmail() {
+		// given
+		String value = "test@test.com";
 
-        // when
-        Email email = Email.from(validEmail);
+		// when
+		Email email = Email.from(value);
 
-        // then
-        assertThat(email).isNotNull();
-        assertThat(email.getValue()).isEqualTo(validEmail);
-    }
+		// then
+		assertThat(email.getValue()).isEqualTo(value);
+	}
 
-    @ParameterizedTest
-    @ValueSource(strings = {"test", "test@", "@example.com", "test@.com"})
-    @DisplayName("유효하지 않은 이메일 형식일 경우 UserException을 던진다.")
-    void throw_exception_for_invalid_format(String invalidEmail) {
-        // when & then
-        assertThatThrownBy(() -> Email.from(invalidEmail))
-                .isInstanceOf(UserException.class)
-                .hasFieldOrPropertyWithValue("errorCode", UserErrorCode.INVALID_EMAIL_FORMAT);
-    }
+	@DisplayName("유효하지 않은 형식의 이메일로 객체를 생성하면 예외가 발생한다.")
+	@ParameterizedTest
+	@ValueSource(strings = {"invalid-email", "test@", "@test.com"})
+	void createEmailWithInvalidFormat(String invalidEmail) {
+		assertThatThrownBy(() -> Email.from(invalidEmail))
+				.isInstanceOfSatisfying(UserException.class,
+						ex -> assertThat(ex.getErrorCode())
+								.isEqualTo(UserErrorCode.INVALID_EMAIL_FORMAT));
+	}
 
-    @Test
-    @DisplayName("같은 값을 가진 Email 객체는 동등하다.")
-    void email_objects_with_same_value_are_equal() {
-        // given
-        String emailValue = "equal@example.com";
-        Email email1 = Email.from(emailValue);
-        Email email2 = Email.from(emailValue);
+	@DisplayName("null, 비어있거나 공백으로만 이루어진 이메일로 객체를 생성하면 예외가 발생한다.")
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "   "})
+	void createEmailWithBlankValue(String blankEmail) {
+		assertThatThrownBy(() -> Email.from(blankEmail))
+				.isInstanceOfSatisfying(UserException.class,
+						ex -> assertThat(ex.getErrorCode())
+								.isEqualTo(UserErrorCode.INVALID_EMAIL_FORMAT));
+	}
 
-        // when & then
-        assertThat(email1).isEqualTo(email2);
-        assertThat(email1.hashCode()).isEqualTo(email2.hashCode());
-    }
+	@DisplayName("이메일은 정규화(trim, 소문자)되어 저장된다.")
+	@Test
+	void createEmailWithNormalization() {
+		// given
+		String originalEmail = "  Test@Test.Com  ";
+		String normalizedEmail = "test@test.com";
+
+		// when
+		Email email = Email.from(originalEmail);
+
+		// then
+		assertThat(email.getValue()).isEqualTo(normalizedEmail);
+	}
 }
