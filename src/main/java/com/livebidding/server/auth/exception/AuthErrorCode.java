@@ -10,8 +10,9 @@ import org.springframework.http.HttpStatus;
 public enum AuthErrorCode implements ErrorCode {
     INVALID_JWT_SIGNATURE(HttpStatus.UNAUTHORIZED, "JWT 서명이 유효하지 않습니다."),
     EXPIRED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "JWT 토큰이 만료되었습니다."),
-    UNSUPPORTED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "지원되지 않는 JWT 토큰입니다."),
-    INVALID_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다.");
+    UNSUPPORTED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "지원하지 않는 형식의 토큰입니다."),
+    INVALID_JWT_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "JWT 시크릿 키가 유효하지 않습니다."),
+    INVALID_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.");
 
     private static final String PREFIX = "[AUTH ERROR] ";
     private final HttpStatus status;
