@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 @Getter
 @Embeddable
@@ -24,16 +25,24 @@ public class Email {
     private String value;
 
     private Email(final String value) {
-        validate(value);
-        this.value = value;
+        String normalizedEmail = normalize(value);
+        validateFormat(normalizedEmail);
+        this.value = normalizedEmail;
     }
 
     public static Email from(final String value) {
         return new Email(value);
     }
 
-    private void validate(final String value) {
-        if (value == null || !EMAIL_PATTERN.matcher(value).matches()) {
+    private String normalize(final String value) {
+        if (!StringUtils.hasText(value)) {
+            throw new UserException(UserErrorCode.INVALID_EMAIL_FORMAT);
+        }
+        return value.trim().toLowerCase();
+    }
+
+    private void validateFormat(final String value) {
+        if (!EMAIL_PATTERN.matcher(value).matches()) {
             throw new UserException(UserErrorCode.INVALID_EMAIL_FORMAT);
         }
     }

@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,8 +52,8 @@ public class UserService {
                     );
 
             return new TokenResponse(accessToken, refreshTokenValue);
-        } catch (BadCredentialsException e) {
-            throw new UserException(UserErrorCode.WRONG_PASSWORD);
+        } catch (AuthenticationException e) {
+            throw new UserException(UserErrorCode.INVALID_CREDENTIALS);
         }
     }
 

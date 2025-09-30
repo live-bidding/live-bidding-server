@@ -10,33 +10,35 @@ import org.junit.jupiter.api.Test;
 class RefreshTokenTest {
 
     @Test
-    @DisplayName("of 팩토리 메소드로 RefreshToken 객체를 생성한다")
+    @DisplayName("of 팩토리 메소드로 RefreshToken 객체를 생성하고 토큰 값을 해싱하여 저장한다")
     void create_refreshToken_successfully() {
         // given
         User user = mock(User.class);
-        String tokenValue = "a.b.c";
+        String rawTokenValue = "a.b.c";
 
         // when
-        RefreshToken refreshToken = RefreshToken.of(user, tokenValue);
+        RefreshToken refreshToken = RefreshToken.of(user, rawTokenValue);
 
         // then
         assertThat(refreshToken).isNotNull();
         assertThat(refreshToken.getUser()).isEqualTo(user);
-        assertThat(refreshToken.getTokenValue().getValue()).isEqualTo(tokenValue);
+        assertThat(refreshToken.getTokenValue()).isNotNull();
+        assertThat(refreshToken.getTokenValue().getValue()).isNotEqualTo(rawTokenValue);
     }
 
     @Test
-    @DisplayName("updateToken 메소드로 토큰 값을 변경한다")
+    @DisplayName("updateToken 메소드로 토큰 값을 해싱하여 변경한다")
     void update_token_successfully() {
         // given
         User user = mock(User.class);
         RefreshToken refreshToken = RefreshToken.of(user, "old.token.value");
-        String newTokenValue = "new.token.value";
+        String newRawTokenValue = "new.token.value";
 
         // when
-        refreshToken.updateToken(newTokenValue);
+        refreshToken.updateToken(newRawTokenValue);
 
         // then
-        assertThat(refreshToken.getTokenValue().getValue()).isEqualTo(newTokenValue);
+        assertThat(refreshToken.getTokenValue()).isNotNull();
+        assertThat(refreshToken.getTokenValue().getValue()).isNotEqualTo(newRawTokenValue);
     }
 }

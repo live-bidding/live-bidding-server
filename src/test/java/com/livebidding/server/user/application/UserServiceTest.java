@@ -116,7 +116,7 @@ class UserServiceTest {
             // when & then
             assertThatThrownBy(() -> userService.login(request))
                     .isInstanceOf(UserException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", UserErrorCode.WRONG_PASSWORD);
+                    .hasFieldOrPropertyWithValue("errorCode", UserErrorCode.INVALID_CREDENTIALS);
         }
     }
 }

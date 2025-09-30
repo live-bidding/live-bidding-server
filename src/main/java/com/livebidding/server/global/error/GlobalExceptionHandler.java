@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        ErrorCode errorCode = GlobalErrorCode.INVALID_INPUT_VALUE;
+        ErrorCode errorCode = GlobalErrorCode.INPUT_VALUE_INVALID;
         List<String> errorMessages = e.getBindingResult().getAllErrors().stream()
                 .map(error -> {
                     if (error instanceof FieldError fieldError) {

@@ -5,6 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.livebidding.server.auth.domain.entity.RefreshToken;
 import com.livebidding.server.user.domain.entity.User;
 import com.livebidding.server.user.domain.repository.UserRepository;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,13 +26,13 @@ class RefreshTokenRepositoryTest {
 
     @Test
     @DisplayName("사용자 ID로 RefreshToken을 조회한다")
-    void find_by_user_id() {
+    void find_by_user_id() throws NoSuchAlgorithmException {
         // given
         User user = User.of("test@test.com", "$2a$10$N9qo8uLOickgx2ZMRZoMye.aA.w.dTBxI1s/oSp5kL182bGRfB0Fi", "testuser");
         userRepository.save(user);
 
-        String tokenValue = "a.b.c";
-        RefreshToken refreshToken = RefreshToken.of(user, tokenValue);
+        String rawTokenValue = "a.b.c";
+        RefreshToken refreshToken = RefreshToken.of(user, rawTokenValue);
         refreshTokenRepository.save(refreshToken);
 
         // when
@@ -37,6 +41,11 @@ class RefreshTokenRepositoryTest {
         // then
         assertThat(foundToken).isPresent();
         assertThat(foundToken.get().getUser()).isEqualTo(user);
-        assertThat(foundToken.get().getTokenValue().getValue()).isEqualTo(tokenValue);
+
+        // 직접 해시 값을 만들어 비교
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(rawTokenValue.getBytes(StandardCharsets.UTF_8));
+        String expectedHexHash = HexFormat.of().formatHex(hash);
+        assertThat(foundToken.get().getTokenValue().getValue()).isEqualTo(expectedHexHash);
     }
 }

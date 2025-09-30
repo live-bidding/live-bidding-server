@@ -14,16 +14,22 @@ import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Date;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
+
+    private static final int MIN_KEY_LENGTH_BYTES = 32;
+
+    private final UserDetailsService userDetailsService;
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -45,7 +51,7 @@ public class JwtTokenProvider {
             keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         }
 
-        if (keyBytes.length < 32) {
+        if (keyBytes.length < MIN_KEY_LENGTH_BYTES) {
             throw new AuthException(AuthErrorCode.INVALID_JWT_SECRET_KEY);
         }
         this.key = Keys.hmacShaKeyFor(keyBytes);
@@ -86,9 +92,10 @@ public class JwtTokenProvider {
 
     public Authentication getAuthentication(String token) {
         try {
-            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-            User principal = new User(claims.getSubject(), "", Collections.emptyList());
-            return new UsernamePasswordAuthenticationToken(principal, token, Collections.emptyList());
+            Claims claims = Jwts.parserBuilder().setSigningKey(key).build()
+                    .parseClaimsJws(token).getBody();
+            UserDetails userDetails = userDetailsService.loadUserByUsername(claims.getSubject());
+            return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
         } catch (Exception e) {
             throw new AuthException(AuthErrorCode.INVALID_JWT_TOKEN);
         }

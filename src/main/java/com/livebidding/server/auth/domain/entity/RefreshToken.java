@@ -35,11 +35,11 @@ public class RefreshToken {
         this.tokenValue = tokenValue;
     }
 
-    public static RefreshToken of(User user, String tokenValue) {
-        return new RefreshToken(user, TokenValue.from(tokenValue));
+    public static RefreshToken of(User user, String rawTokenValue) {
+        return new RefreshToken(user, TokenValue.hashed(rawTokenValue));
     }
 
-    public void updateToken(String newTokenValue) {
-        this.tokenValue = TokenValue.from(newTokenValue);
+    public void updateToken(String newRawTokenValue) {
+        this.tokenValue = TokenValue.hashed(newRawTokenValue);
     }
 }
