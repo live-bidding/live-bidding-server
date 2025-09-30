@@ -3,6 +3,8 @@ package com.livebidding.server.user.domain.vo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.livebidding.server.user.exception.UserErrorCode;
+import com.livebidding.server.user.exception.UserException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,11 +25,11 @@ class UsernameTest {
     }
 
     @Test
-    @DisplayName("비어있는 문자열일 경우 예외를 던진다.")
+    @DisplayName("비어있는 문자열일 경우 UserException을 던진다.")
     void throw_exception_for_empty_string() {
         // when & then
         assertThatThrownBy(() -> Username.from(""))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR] 사용자 이름은 공백일 수 없습니다.");
+                .isInstanceOf(UserException.class)
+                .hasFieldOrPropertyWithValue("errorCode", UserErrorCode.EMPTY_USERNAME);
     }
 }

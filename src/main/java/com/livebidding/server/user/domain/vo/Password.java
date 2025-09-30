@@ -1,5 +1,7 @@
 package com.livebidding.server.user.domain.vo;
 
+import com.livebidding.server.user.exception.UserErrorCode;
+import com.livebidding.server.user.exception.UserException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
@@ -32,10 +34,10 @@ public class Password {
 
     private void validate(final String value) {
         if (!StringUtils.hasText(value)) {
-            throw new IllegalArgumentException("[ERROR] 비밀번호는 공백일 수 없습니다.");
+            throw new UserException(UserErrorCode.EMPTY_PASSWORD);
         }
         if (!BCRYPT_PATTERN.matcher(value).matches()) {
-            throw new IllegalArgumentException("[ERROR] 비밀번호가 유효한 BCrypt 형식이 아닙니다.");
+            throw new UserException(UserErrorCode.INVALID_PASSWORD_FORMAT);
         }
     }
 }

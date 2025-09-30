@@ -1,5 +1,7 @@
 package com.livebidding.server.bid.domain.entity;
 
+import com.livebidding.server.bid.exception.BidErrorCode;
+import com.livebidding.server.bid.exception.BidException;
 import com.livebidding.server.product.domain.entity.Product;
 import com.livebidding.server.product.domain.vo.Price;
 import com.livebidding.server.user.domain.entity.User;
@@ -55,10 +57,10 @@ public class Bid {
 
     public static Bid of(Long price, User bidder, Product product) {
         if (bidder == null) {
-            throw new IllegalArgumentException("[ERROR] 입찰자는 null일 수 없습니다.");
+            throw new BidException(BidErrorCode.BIDDER_CANNOT_BE_NULL);
         }
         if (product == null) {
-            throw new IllegalArgumentException("[ERROR] 입찰 상품은 null일 수 없습니다.");
+            throw new BidException(BidErrorCode.PRODUCT_CANNOT_BE_NULL);
         }
         return new Bid(
                 Price.from(price),

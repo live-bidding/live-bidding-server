@@ -1,5 +1,7 @@
 package com.livebidding.server.product.domain.vo;
 
+import com.livebidding.server.product.exception.ProductErrorCode;
+import com.livebidding.server.product.exception.ProductException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
@@ -28,7 +30,7 @@ public class ProductName {
 
     private void validate(final String value) {
         if (!StringUtils.hasText(value)) {
-            throw new IllegalArgumentException("[ERROR] 상품명은 공백일 수 없습니다.");
+            throw new ProductException(ProductErrorCode.EMPTY_PRODUCT_NAME);
         }
     }
 }

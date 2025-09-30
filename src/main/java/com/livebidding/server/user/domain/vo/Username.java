@@ -1,5 +1,7 @@
 package com.livebidding.server.user.domain.vo;
 
+import com.livebidding.server.user.exception.UserErrorCode;
+import com.livebidding.server.user.exception.UserException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
@@ -28,7 +30,7 @@ public class Username {
 
     private void validate(final String value) {
         if (!StringUtils.hasText(value)) {
-            throw new IllegalArgumentException("[ERROR] 사용자 이름은 공백일 수 없습니다.");
+            throw new UserException(UserErrorCode.EMPTY_USERNAME);
         }
     }
 }

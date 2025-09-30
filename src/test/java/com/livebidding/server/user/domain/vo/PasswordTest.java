@@ -3,6 +3,8 @@ package com.livebidding.server.user.domain.vo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.livebidding.server.user.exception.UserErrorCode;
+import com.livebidding.server.user.exception.UserException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,23 +32,23 @@ class PasswordTest {
     @ParameterizedTest
     @ValueSource(strings = {
             "password123", // 평문
-            "$2a$10$short", // 짧은 해시
-            "$2a$10$abcdefghijklmnopqrstuvwxyz123456" // 길이가 맞지 않는 해시
+            "$2a$10$short",  // 짧은 해시
+            "$2a$10$abcdefghijklmnopqrstuvwxyz123456" // 잘못된 길이의 해시
     })
-    @DisplayName("유효하지 않은 형식의 문자열일 경우 예외를 던진다.")
+    @DisplayName("유효하지 않은 형식의 문자열일 경우 UserException을 던진다.")
     void throw_exception_for_invalid_format(String invalidPassword) {
         // when & then
         assertThatThrownBy(() -> Password.fromEncoded(invalidPassword))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR] 비밀번호가 유효한 BCrypt 형식이 아닙니다.");
+                .isInstanceOf(UserException.class)
+                .hasFieldOrPropertyWithValue("errorCode", UserErrorCode.INVALID_PASSWORD_FORMAT);
     }
 
     @Test
-    @DisplayName("비어있는 문자열일 경우 예외를 던진다.")
+    @DisplayName("비어있는 문자열일 경우 UserException을 던진다.")
     void throw_exception_for_empty_string() {
         // when & then
         assertThatThrownBy(() -> Password.fromEncoded(""))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR] 비밀번호는 공백일 수 없습니다.");
+                .isInstanceOf(UserException.class)
+                .hasFieldOrPropertyWithValue("errorCode", UserErrorCode.EMPTY_PASSWORD);
     }
 }

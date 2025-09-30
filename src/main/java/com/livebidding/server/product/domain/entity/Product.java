@@ -5,6 +5,8 @@ import com.livebidding.server.product.domain.vo.AuctionPeriod;
 import com.livebidding.server.product.domain.vo.Price;
 import com.livebidding.server.product.domain.vo.ProductDescription;
 import com.livebidding.server.product.domain.vo.ProductName;
+import com.livebidding.server.product.exception.ProductErrorCode;
+import com.livebidding.server.product.exception.ProductException;
 import com.livebidding.server.user.domain.entity.User;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -69,7 +71,7 @@ public class Product {
 
     public static Product of(String name, String description, Long startPrice, LocalDateTime startTime, LocalDateTime endTime, User seller) {
         if (seller == null) {
-            throw new IllegalArgumentException("[ERROR] 상품 판매자는 null일 수 없습니다.");
+            throw new ProductException(ProductErrorCode.SELLER_CANNOT_BE_NULL);
         }
         return new Product(
                 ProductName.from(name),

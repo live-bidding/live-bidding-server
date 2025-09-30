@@ -1,5 +1,7 @@
 package com.livebidding.server.user.domain.vo;
 
+import com.livebidding.server.user.exception.UserErrorCode;
+import com.livebidding.server.user.exception.UserException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
@@ -32,7 +34,7 @@ public class Email {
 
     private void validate(final String value) {
         if (value == null || !EMAIL_PATTERN.matcher(value).matches()) {
-            throw new IllegalArgumentException("[ERROR] 유효하지 않은 이메일 형식입니다.");
+            throw new UserException(UserErrorCode.INVALID_EMAIL_FORMAT);
         }
     }
 }
