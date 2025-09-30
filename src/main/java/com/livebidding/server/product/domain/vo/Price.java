@@ -1,6 +1,5 @@
 package com.livebidding.server.product.domain.vo;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -13,7 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Price {
 
-    @Column(name = "price")
     private Long value;
 
     private Price(final Long value) {

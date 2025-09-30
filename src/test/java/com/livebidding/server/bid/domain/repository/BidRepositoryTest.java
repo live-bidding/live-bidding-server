@@ -12,7 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("test")
 @DataJpaTest
 class BidRepositoryTest {
 
@@ -27,8 +29,8 @@ class BidRepositoryTest {
     @DisplayName("Bid 엔티티를 성공적으로 저장한다.")
     void save_bid_successfully() {
         // given
-        User seller = User.of("seller@test.com", "$2a$10$sellerpasswordhash", "판매자");
-        User bidder = User.of("bidder@test.com", "$2a$10$bidderpasswordhash", "입찰자");
+        User seller = User.of("seller@test.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", "판매자");
+        User bidder = User.of("bidder@test.com", "$2a$10$dRVc2G2Y32fW2./ssxGoKe0L9GkGu7C2s5GwAZxk5OB6KKAjB5wly", "입찰자");
         userRepository.save(seller);
         userRepository.save(bidder);
 

@@ -11,7 +11,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("test")
 @DataJpaTest
 class ProductRepositoryTest {
 
@@ -25,7 +27,7 @@ class ProductRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        seller = User.of("seller@test.com", "$2a$10$sellerpasswordhash", "판매자");
+        seller = User.of("seller@test.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", "판매자");
         userRepository.save(seller);
     }
 

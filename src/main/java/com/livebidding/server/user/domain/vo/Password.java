@@ -2,6 +2,7 @@ package com.livebidding.server.user.domain.vo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.regex.Pattern;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,7 +15,8 @@ import org.springframework.util.StringUtils;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Password {
 
-    private static final String BCRYPT_ID_PREFIX = "{bcrypt}";
+    private static final Pattern BCRYPT_PATTERN =
+            Pattern.compile("^(\\{bcrypt\\})?\\$2[aby]\\$\\d{2}\\$[./A-Za-z0-9]{53}$");
 
     @Column(name = "password", nullable = false)
     private String value;
@@ -32,14 +34,8 @@ public class Password {
         if (!StringUtils.hasText(value)) {
             throw new IllegalArgumentException("[ERROR] 비밀번호는 공백일 수 없습니다.");
         }
-
-        String hash = value;
-        if (hash.startsWith(BCRYPT_ID_PREFIX)) {
-            hash = hash.substring(BCRYPT_ID_PREFIX.length());
-        }
-
-        if (!hash.startsWith("$2a$") && !hash.startsWith("$2b$") && !hash.startsWith("$2y$")) {
-            throw new IllegalArgumentException("[ERROR] 비밀번호가 BCrypt 형식으로 암호화되지 않았습니다.");
+        if (!BCRYPT_PATTERN.matcher(value).matches()) {
+            throw new IllegalArgumentException("[ERROR] 비밀번호가 유효한 BCrypt 형식이 아닙니다.");
         }
     }
 }

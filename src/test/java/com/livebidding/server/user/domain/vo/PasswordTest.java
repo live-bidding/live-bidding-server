@@ -12,13 +12,13 @@ class PasswordTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "$2a$10$abcdefghijklmnopqrstuvwxyz123456",
-            "$2b$10$abcdefghijklmnopqrstuvwxyz123456",
-            "$2y$10$abcdefghijklmnopqrstuvwxyz123456",
-            "{bcrypt}$2a$10$abcdefghijklmnopqrstuvwxyz123456"
+            "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+            "$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+            "$2y$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+            "{bcrypt}$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
     })
-    @DisplayName("다양한 BCrypt 형식의 암호화된 문자열로 Password 객체를 생성한다.")
-    void create_password_with_various_encoded_formats(String encodedPassword) {
+    @DisplayName("유효한 전체 BCrypt 형식의 문자열로 Password 객체를 생성한다.")
+    void create_password_with_valid_full_bcrypt_hash(String encodedPassword) {
         // when
         Password password = Password.fromEncoded(encodedPassword);
 
@@ -27,16 +27,18 @@ class PasswordTest {
         assertThat(password.getValue()).isEqualTo(encodedPassword);
     }
 
-    @Test
-    @DisplayName("암호화되지 않은 평문 문자열일 경우 예외를 던진다.")
-    void throw_exception_for_plain_text() {
-        // given
-        String plainPassword = "password123";
-
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "password123", // 평문
+            "$2a$10$short", // 짧은 해시
+            "$2a$10$abcdefghijklmnopqrstuvwxyz123456" // 길이가 맞지 않는 해시
+    })
+    @DisplayName("유효하지 않은 형식의 문자열일 경우 예외를 던진다.")
+    void throw_exception_for_invalid_format(String invalidPassword) {
         // when & then
-        assertThatThrownBy(() -> Password.fromEncoded(plainPassword))
+        assertThatThrownBy(() -> Password.fromEncoded(invalidPassword))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR] 비밀번호가 BCrypt 형식으로 암호화되지 않았습니다.");
+                .hasMessageContaining("[ERROR] 비밀번호가 유효한 BCrypt 형식이 아닙니다.");
     }
 
     @Test

@@ -8,21 +8,22 @@ import org.junit.jupiter.api.Test;
 
 class UserTest {
 
+    private final String validEncodedPassword = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+
     @Test
     @DisplayName("유효한 정보로 User 객체를 성공적으로 생성한다.")
     void create_user_successfully() {
         // given
         String email = "test@example.com";
-        String encodedPassword = "$2a$10$abcdefghijklmnopqrstuvwxyz123456";
         String name = "테스터";
 
         // when
-        User user = User.of(email, encodedPassword, name);
+        User user = User.of(email, validEncodedPassword, name);
 
         // then
         assertThat(user).isNotNull();
         assertThat(user.getEmail().getValue()).isEqualTo(email);
-        assertThat(user.getPassword().getValue()).isEqualTo(encodedPassword);
+        assertThat(user.getPassword().getValue()).isEqualTo(validEncodedPassword);
         assertThat(user.getName().getValue()).isEqualTo(name);
     }
 
@@ -31,11 +32,10 @@ class UserTest {
     void create_user_with_invalid_email_throws_exception() {
         // given
         String invalidEmail = "invalid-email";
-        String encodedPassword = "$2a$10$abcdefghijklmnopqrstuvwxyz123456";
         String name = "테스터";
 
         // when & then
-        assertThatThrownBy(() -> User.of(invalidEmail, encodedPassword, name))
+        assertThatThrownBy(() -> User.of(invalidEmail, validEncodedPassword, name))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
