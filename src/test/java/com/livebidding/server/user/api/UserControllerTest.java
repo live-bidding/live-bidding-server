@@ -21,10 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(UserController.class)
+@WebMvcTest(controllers = UserController.class)
 @Import(SecurityConfig.class)
 class UserControllerTest {
 
@@ -39,6 +40,9 @@ class UserControllerTest {
 
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     @Nested
     @DisplayName("/api/users/signup 요청 시")

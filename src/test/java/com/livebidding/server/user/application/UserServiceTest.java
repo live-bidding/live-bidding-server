@@ -25,7 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -44,7 +44,7 @@ class UserServiceTest {
     @Mock
     private JwtTokenProvider jwtTokenProvider;
     @Mock
-    private AuthenticationManager authenticationManager;
+    private AuthenticationProvider authenticationProvider;
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
 
@@ -91,7 +91,7 @@ class UserServiceTest {
             Authentication authentication = new UsernamePasswordAuthenticationToken(request.email(), request.password());
             User user = User.of(request.email(), "$2a$10$N9qo8uLOickgx2ZMRZoMye.aA.w.dTBxI1s/oSp5kL182bGRfB0Fi", "testuser");
 
-            given(authenticationManager.authenticate(any())).willReturn(authentication);
+            given(authenticationProvider.authenticate(any())).willReturn(authentication);
             given(userRepository.findByEmail(any(Email.class))).willReturn(Optional.of(user));
             given(jwtTokenProvider.createAccessToken(authentication)).willReturn("accessToken");
             given(jwtTokenProvider.createRefreshToken(authentication)).willReturn("refreshToken");
@@ -111,7 +111,7 @@ class UserServiceTest {
         void login_fail_wrong_password() {
             // given
             LoginRequest request = new LoginRequest("test@test.com", "wrongPassword");
-            given(authenticationManager.authenticate(any())).willThrow(new BadCredentialsException("Wrong password"));
+            given(authenticationProvider.authenticate(any())).willThrow(new BadCredentialsException("Wrong password"));
 
             // when & then
             assertThatThrownBy(() -> userService.login(request))
