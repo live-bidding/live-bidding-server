@@ -26,7 +26,10 @@ public class Price {
     }
 
     private void validate(final Long value) {
-        if (value == null || value < 0) {
+        if (value == null) {
+            throw new ProductException(ProductErrorCode.PRICE_CANNOT_BE_NULL);
+        }
+        if (value < 0) {
             throw new ProductException(ProductErrorCode.PRICE_CANNOT_BE_NEGATIVE);
         }
     }

@@ -1,13 +1,15 @@
 package com.livebidding.server.global.error;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -23,9 +25,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         ErrorCode errorCode = GlobalErrorCode.INVALID_INPUT_VALUE;
-        String detailMessage = e.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> String.format("'%s' 필드: %s", fieldError.getField(), fieldError.getDefaultMessage()))
-                .collect(Collectors.joining(", "));
+        List<String> errorMessages = e.getBindingResult().getAllErrors().stream()
+                .map(error -> {
+                    if (error instanceof FieldError fieldError) {
+                        return String.format("'%s' 필드: %s", fieldError.getField(), fieldError.getDefaultMessage());
+                    }
+                    return error.getDefaultMessage();
+                })
+                .filter(StringUtils::hasText)
+                .collect(Collectors.toList());
+        String detailMessage = String.join(", ", errorMessages);
+        if (!StringUtils.hasText(detailMessage)) {
+            detailMessage = errorCode.getMessage();
+        }
         log.warn(">> 입력값 유효성 검사 실패: {}", detailMessage);
         return createResponseEntity(errorCode, detailMessage);
     }

@@ -32,7 +32,8 @@ class PasswordTest {
     @ParameterizedTest
     @ValueSource(strings = {
             "password123", // 평문
-            "$2a$10$short"  // 짧은 해시
+            "$2a$10$short",  // 짧은 해시
+            "$2a$10$abcdefghijklmnopqrstuvwxyz123456" // 잘못된 길이의 해시
     })
     @DisplayName("유효하지 않은 형식의 문자열일 경우 UserException을 던진다.")
     void throw_exception_for_invalid_format(String invalidPassword) {

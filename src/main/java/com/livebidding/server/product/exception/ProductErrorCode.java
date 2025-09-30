@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ProductErrorCode implements ErrorCode {
+    PRICE_CANNOT_BE_NULL(HttpStatus.BAD_REQUEST, "가격은 null일 수 없습니다."),
     EMPTY_PRODUCT_NAME(HttpStatus.BAD_REQUEST, "상품명은 공백일 수 없습니다."),
     EMPTY_PRODUCT_DESCRIPTION(HttpStatus.BAD_REQUEST, "상품 설명은 공백일 수 없습니다."),
     PRICE_CANNOT_BE_NEGATIVE(HttpStatus.BAD_REQUEST, "가격은 0 이상이어야 합니다."),
@@ -23,5 +24,10 @@ public enum ProductErrorCode implements ErrorCode {
     @Override
     public String getMessage() {
         return PREFIX + rawMessage;
+    }
+
+    @Override
+    public HttpStatus getStatus() {
+        return status;
     }
 }
