@@ -12,7 +12,7 @@ import com.livebidding.server.user.domain.vo.Email;
 import com.livebidding.server.user.exception.UserErrorCode;
 import com.livebidding.server.user.exception.UserException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,7 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final AuthenticationManager authenticationManager;
+    private final AuthenticationProvider authenticationProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
@@ -36,7 +36,7 @@ public class UserService {
         try {
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(request.email(), request.password());
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            Authentication authentication = authenticationProvider.authenticate(authenticationToken);
 
             User user = userRepository.findByEmail(Email.from(request.email()))
                     .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
