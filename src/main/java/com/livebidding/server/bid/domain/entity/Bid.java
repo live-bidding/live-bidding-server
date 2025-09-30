@@ -47,12 +47,28 @@ public class Bid {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    /**
+     * Creates a Bid with the specified price, bidder, and product.
+     *
+     * @param price  the bid amount as a Price value object
+     * @param bidder the user placing the bid
+     * @param product the product being bid on
+     */
     private Bid(Price price, User bidder, Product product) {
         this.price = price;
         this.bidder = bidder;
         this.product = product;
     }
 
+    /**
+     * Create a Bid for a product by a bidder using the provided price.
+     *
+     * @param price  numeric price value used to construct the Bid's Price value object
+     * @param bidder the user placing the bid; must not be null
+     * @param product the product being bid on; must not be null
+     * @return the newly created Bid
+     * @throws IllegalArgumentException if {@code bidder} is null ("[ERROR] 입찰자는 null일 수 없습니다.") or if {@code product} is null ("[ERROR] 입찰 상품은 null일 수 없습니다.")
+     */
     public static Bid of(Long price, User bidder, Product product) {
         if (bidder == null) {
             throw new IllegalArgumentException("[ERROR] 입찰자는 null일 수 없습니다.");

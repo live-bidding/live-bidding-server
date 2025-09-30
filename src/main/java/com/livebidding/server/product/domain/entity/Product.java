@@ -57,6 +57,16 @@ public class Product {
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
 
+    /**
+     * Constructs a Product with the provided value objects and seller, initializing the current price
+     * to the start price and setting the product status to PREPARED.
+     *
+     * @param name the product's name value object
+     * @param description the product's description value object
+     * @param startPrice the starting price value object
+     * @param auctionPeriod the auction period value object defining start and end times
+     * @param seller the user who lists the product for auction
+     */
     private Product(ProductName name, ProductDescription description, Price startPrice, AuctionPeriod auctionPeriod, User seller) {
         this.name = name;
         this.description = description;
@@ -67,6 +77,19 @@ public class Product {
         this.seller = seller;
     }
 
+    /**
+     * Create a new Product with the given name, description, starting price, auction period, and seller.
+     *
+     * The created Product's current price is initialized from the provided startPrice and its status is set to PREPARED.
+     *
+     * @param name the product name
+     * @param description the product description
+     * @param startPrice the starting price value for the product
+     * @param startTime the auction start time
+     * @param endTime the auction end time
+     * @param seller the user who is selling the product
+     * @return a newly constructed Product populated with the provided attributes
+     */
     public static Product of(String name, String description, Long startPrice, LocalDateTime startTime, LocalDateTime endTime, User seller) {
         return new Product(
                 ProductName.from(name),
