@@ -31,9 +31,9 @@ class EmailTest {
 	@ValueSource(strings = {"invalid-email", "test@", "@test.com"})
 	void createEmailWithInvalidFormat(String invalidEmail) {
 		assertThatThrownBy(() -> Email.from(invalidEmail))
-				.isInstanceOf(UserException.class)
-				.extracting("errorCode")
-				.isEqualTo(UserErrorCode.INVALID_EMAIL_FORMAT);
+				.isInstanceOfSatisfying(UserException.class,
+						ex -> assertThat(ex.getErrorCode())
+								.isEqualTo(UserErrorCode.INVALID_EMAIL_FORMAT));
 	}
 
 	@DisplayName("null, 비어있거나 공백으로만 이루어진 이메일로 객체를 생성하면 예외가 발생한다.")
@@ -42,9 +42,9 @@ class EmailTest {
 	@ValueSource(strings = {" ", "   "})
 	void createEmailWithBlankValue(String blankEmail) {
 		assertThatThrownBy(() -> Email.from(blankEmail))
-				.isInstanceOf(UserException.class)
-				.extracting("errorCode")
-				.isEqualTo(UserErrorCode.INVALID_EMAIL_FORMAT);
+				.isInstanceOfSatisfying(UserException.class,
+						ex -> assertThat(ex.getErrorCode())
+								.isEqualTo(UserErrorCode.INVALID_EMAIL_FORMAT));
 	}
 
 	@DisplayName("이메일은 정규화(trim, 소문자)되어 저장된다.")
