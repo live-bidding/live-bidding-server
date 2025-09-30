@@ -16,7 +16,7 @@ import org.springframework.util.StringUtils;
 @EqualsAndHashCode
 public class TokenValue {
 
-    @Column(name = "token_value", nullable = false, unique = true, length = 500)
+    @Column(name = "token_value", nullable = false, length = 500)
     private String value;
 
     private TokenValue(final String value) {
