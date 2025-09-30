@@ -34,6 +34,18 @@ class AuctionPeriodTest {
         // when & then
         assertThatThrownBy(() -> AuctionPeriod.of(startTime, endTime))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR] 경매 종료 시간은 시작 시간보다 이전일 수 없습니다.");
+                .hasMessageContaining("[ERROR] 경매 종료 시간은 시작 시간보다 이후여야 합니다.");
+    }
+
+    @Test
+    @DisplayName("종료 시간과 시작 시간이 같을 경우 예외를 던진다.")
+    void throw_exception_when_endTime_is_equal_to_startTime() {
+        // given
+        LocalDateTime now = LocalDateTime.now();
+
+        // when & then
+        assertThatThrownBy(() -> AuctionPeriod.of(now, now))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("[ERROR] 경매 종료 시간은 시작 시간보다 이후여야 합니다.");
     }
 }

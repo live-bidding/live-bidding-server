@@ -5,15 +5,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class PasswordTest {
 
-    @Test
-    @DisplayName("유효한 암호화된 문자열로 Password 객체를 생성한다.")
-    void create_password_with_encoded_value() {
-        // given
-        String encodedPassword = "$2a$10$abcdefghijklmnopqrstuvwxyz123456";
-
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "$2a$10$abcdefghijklmnopqrstuvwxyz123456",
+            "$2b$10$abcdefghijklmnopqrstuvwxyz123456",
+            "$2y$10$abcdefghijklmnopqrstuvwxyz123456",
+            "{bcrypt}$2a$10$abcdefghijklmnopqrstuvwxyz123456"
+    })
+    @DisplayName("다양한 BCrypt 형식의 암호화된 문자열로 Password 객체를 생성한다.")
+    void create_password_with_various_encoded_formats(String encodedPassword) {
         // when
         Password password = Password.fromEncoded(encodedPassword);
 
@@ -31,7 +36,7 @@ class PasswordTest {
         // when & then
         assertThatThrownBy(() -> Password.fromEncoded(plainPassword))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR] 비밀번호가 암호화되지 않았습니다.");
+                .hasMessageContaining("[ERROR] 비밀번호가 BCrypt 형식으로 암호화되지 않았습니다.");
     }
 
     @Test

@@ -34,8 +34,8 @@ public class AuctionPeriod {
         if (startTime == null || endTime == null) {
             throw new IllegalArgumentException("[ERROR] 경매 시간은 null일 수 없습니다.");
         }
-        if (endTime.isBefore(startTime)) {
-            throw new IllegalArgumentException("[ERROR] 경매 종료 시간은 시작 시간보다 이전일 수 없습니다.");
+        if (!endTime.isAfter(startTime)) {
+            throw new IllegalArgumentException("[ERROR] 경매 종료 시간은 시작 시간보다 이후여야 합니다.");
         }
     }
 }

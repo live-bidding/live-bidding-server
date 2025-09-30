@@ -68,6 +68,9 @@ public class Product {
     }
 
     public static Product of(String name, String description, Long startPrice, LocalDateTime startTime, LocalDateTime endTime, User seller) {
+        if (seller == null) {
+            throw new IllegalArgumentException("[ERROR] 상품 판매자는 null일 수 없습니다.");
+        }
         return new Product(
                 ProductName.from(name),
                 ProductDescription.from(description),
