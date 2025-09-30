@@ -11,7 +11,9 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +38,17 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        byte[] keyBytes;
+        try {
+            keyBytes = Base64.getDecoder().decode(secretKey);
+        } catch (IllegalArgumentException e) {
+            keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        }
+
+        if (keyBytes.length < 32) {
+            throw new AuthException(AuthErrorCode.INVALID_JWT_SECRET_KEY);
+        }
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String createAccessToken(Authentication authentication) {
@@ -67,20 +79,18 @@ public class JwtTokenProvider {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            throw new AuthException(AuthErrorCode.INVALID_JWT_SIGNATURE);
-        } catch (ExpiredJwtException e) {
-            throw new AuthException(AuthErrorCode.EXPIRED_JWT_TOKEN);
-        } catch (UnsupportedJwtException e) {
-            throw new AuthException(AuthErrorCode.UNSUPPORTED_JWT_TOKEN);
-        } catch (IllegalArgumentException e) {
-            throw new AuthException(AuthErrorCode.INVALID_JWT_TOKEN);
+        } catch (SecurityException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException e) {
+            return false;
         }
     }
 
     public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-        User principal = new User(claims.getSubject(), "", Collections.emptyList());
-        return new UsernamePasswordAuthenticationToken(principal, token, Collections.emptyList());
+        try {
+            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            User principal = new User(claims.getSubject(), "", Collections.emptyList());
+            return new UsernamePasswordAuthenticationToken(principal, token, Collections.emptyList());
+        } catch (Exception e) {
+            throw new AuthException(AuthErrorCode.INVALID_JWT_TOKEN);
+        }
     }
 }
