@@ -11,3 +11,8 @@ spring:
     properties:
       hibernate:
         show_sql: true
+
+jwt:
+  secret: ${JWT_SECRET_KEY:DefaultTestSecretKeyForLiveBiddingProject}
+  access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME:1800000}
+
