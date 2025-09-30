@@ -1,5 +1,7 @@
 package com.livebidding.server.product.domain.vo;
 
+import com.livebidding.server.product.exception.ProductErrorCode;
+import com.livebidding.server.product.exception.ProductException;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -25,7 +27,7 @@ public class Price {
 
     private void validate(final Long value) {
         if (value == null || value < 0) {
-            throw new IllegalArgumentException("[ERROR] 가격은 0 이상이어야 합니다.");
+            throw new ProductException(ProductErrorCode.PRICE_CANNOT_BE_NEGATIVE);
         }
     }
 }

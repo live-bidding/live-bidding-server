@@ -3,6 +3,8 @@ package com.livebidding.server.product.domain.vo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.livebidding.server.product.exception.ProductErrorCode;
+import com.livebidding.server.product.exception.ProductException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,11 +19,11 @@ class PriceTest {
     }
 
     @Test
-    @DisplayName("가격이 음수일 경우 예외를 던진다.")
+    @DisplayName("가격이 음수일 경우 ProductException을 던진다.")
     void throw_exception_when_price_is_negative() {
         // when & then
         assertThatThrownBy(() -> Price.from(-100L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR] 가격은 0 이상이어야 합니다.");
+                .isInstanceOf(ProductException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ProductErrorCode.PRICE_CANNOT_BE_NEGATIVE);
     }
 }

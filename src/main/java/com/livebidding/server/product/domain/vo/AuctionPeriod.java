@@ -1,5 +1,7 @@
 package com.livebidding.server.product.domain.vo;
 
+import com.livebidding.server.product.exception.ProductErrorCode;
+import com.livebidding.server.product.exception.ProductException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDateTime;
@@ -32,10 +34,10 @@ public class AuctionPeriod {
 
     private void validate(final LocalDateTime startTime, final LocalDateTime endTime) {
         if (startTime == null || endTime == null) {
-            throw new IllegalArgumentException("[ERROR] 경매 시간은 null일 수 없습니다.");
+            throw new ProductException(ProductErrorCode.AUCTION_TIME_CANNOT_BE_NULL);
         }
         if (!endTime.isAfter(startTime)) {
-            throw new IllegalArgumentException("[ERROR] 경매 종료 시간은 시작 시간보다 이후여야 합니다.");
+            throw new ProductException(ProductErrorCode.INVALID_AUCTION_PERIOD);
         }
     }
 }

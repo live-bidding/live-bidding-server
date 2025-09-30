@@ -3,6 +3,8 @@ package com.livebidding.server.user.domain.entity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.livebidding.server.user.exception.UserErrorCode;
+import com.livebidding.server.user.exception.UserException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +30,7 @@ class UserTest {
     }
 
     @Test
-    @DisplayName("유효하지 않은 이메일로 User 객체 생성 시 예외를 던진다.")
+    @DisplayName("유효하지 않은 이메일로 User 객체 생성 시 UserException을 던진다.")
     void create_user_with_invalid_email_throws_exception() {
         // given
         String invalidEmail = "invalid-email";
@@ -36,6 +38,7 @@ class UserTest {
 
         // when & then
         assertThatThrownBy(() -> User.of(invalidEmail, validEncodedPassword, name))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(UserException.class)
+                .hasFieldOrPropertyWithValue("errorCode", UserErrorCode.INVALID_EMAIL_FORMAT);
     }
 }
