@@ -1,17 +1,12 @@
 package com.livebidding.server.product.domain.entity;
 
-import com.livebidding.server.product.domain.type.ProductStatus;
-import com.livebidding.server.product.domain.vo.AuctionPeriod;
-import com.livebidding.server.product.domain.vo.Price;
-import com.livebidding.server.product.domain.vo.ProductDescription;
-import com.livebidding.server.product.domain.vo.ProductName;
+import com.livebidding.server.product.domain.type.AuctionStatus;
 import com.livebidding.server.product.exception.ProductErrorCode;
 import com.livebidding.server.product.exception.ProductException;
 import com.livebidding.server.user.domain.entity.User;
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -20,65 +15,120 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.util.StringUtils;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Embedded
-    private ProductName name;
+    @Column(nullable = false)
+    private String name;
 
-    @Embedded
-    private ProductDescription description;
+    private String description;
 
-    @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "start_price", nullable = false))
-    private Price startPrice;
+    @Column(nullable = false)
+    private BigDecimal startPrice;
 
-    @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "current_price", nullable = false))
-    private Price currentPrice;
+    @Column(nullable = false)
+    private BigDecimal currentPrice;
 
-    @Embedded
-    private AuctionPeriod auctionPeriod;
+    private LocalDateTime auctionStartTime;
+
+    private LocalDateTime auctionEndTime;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductStatus status;
+    private AuctionStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
 
-    private Product(ProductName name, ProductDescription description, Price startPrice, AuctionPeriod auctionPeriod, User seller) {
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    private Product(String name, String description, BigDecimal startPrice,
+                    LocalDateTime auctionStartTime, LocalDateTime auctionEndTime,
+                    User seller, boolean skipTimeValidation) {
+        if (skipTimeValidation) {
+            validateBasic(name, startPrice, auctionStartTime, auctionEndTime);
+        } else {
+            validate(name, startPrice, auctionStartTime, auctionEndTime);
+        }
+
         this.name = name;
         this.description = description;
         this.startPrice = startPrice;
         this.currentPrice = startPrice;
-        this.auctionPeriod = auctionPeriod;
-        this.status = ProductStatus.PREPARED;
+        this.auctionStartTime = auctionStartTime;
+        this.auctionEndTime = auctionEndTime;
         this.seller = seller;
+        this.status = determineStatus(LocalDateTime.now(), auctionStartTime, auctionEndTime);
     }
 
-    public static Product of(String name, String description, Long startPrice, LocalDateTime startTime, LocalDateTime endTime, User seller) {
-        if (seller == null) {
-            throw new ProductException(ProductErrorCode.SELLER_CANNOT_BE_NULL);
+    public static Product of(String name, String description, BigDecimal startPrice,
+                             LocalDateTime auctionStartTime, LocalDateTime auctionEndTime,
+                             User seller) {
+        return new Product(name, description, startPrice, auctionStartTime, auctionEndTime, seller, false);
+    }
+
+    public static Product ofForTest(String name, String description, BigDecimal startPrice,
+                                    LocalDateTime auctionStartTime, LocalDateTime auctionEndTime,
+                                    User seller) {
+        return new Product(name, description, startPrice, auctionStartTime, auctionEndTime, seller, true);
+    }
+
+    private void validate(String name, BigDecimal startPrice,
+                          LocalDateTime auctionStartTime, LocalDateTime auctionEndTime) {
+        validateBasic(name, startPrice, auctionStartTime, auctionEndTime);
+
+        if (auctionStartTime.isBefore(LocalDateTime.now())) {
+            throw new ProductException(ProductErrorCode.INVALID_AUCTION_TIME);
         }
-        return new Product(
-                ProductName.from(name),
-                ProductDescription.from(description),
-                Price.from(startPrice),
-                AuctionPeriod.of(startTime, endTime),
-                seller
-        );
+    }
+
+    private void validateBasic(String name, BigDecimal startPrice,
+                               LocalDateTime auctionStartTime, LocalDateTime auctionEndTime) {
+        if (!StringUtils.hasText(name)) {
+            throw new ProductException(ProductErrorCode.BLANK_PRODUCT_NAME);
+        }
+        if (startPrice == null || startPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ProductException(ProductErrorCode.INVALID_PRICE);
+        }
+        if (auctionStartTime == null || auctionEndTime == null) {
+            throw new ProductException(ProductErrorCode.INVALID_AUCTION_TIME);
+        }
+        if (auctionEndTime.isBefore(auctionStartTime)) {
+            throw new ProductException(ProductErrorCode.INVALID_AUCTION_TIME);
+        }
+    }
+
+    private AuctionStatus determineStatus(LocalDateTime now, LocalDateTime startTime, LocalDateTime endTime) {
+        if (now.isBefore(startTime)) {
+            return AuctionStatus.SCHEDULED;
+        }
+        if (now.isBefore(endTime)) {
+            return AuctionStatus.IN_PROGRESS;
+        }
+        return AuctionStatus.ENDED;
     }
 }
