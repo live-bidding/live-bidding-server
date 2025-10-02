@@ -21,8 +21,7 @@ class PriceTest {
     @Test
     @DisplayName("가격이 null일 경우 ProductException을 던진다.")
     void throw_exception_when_price_is_null() {
-        // when & then
-        assertThatThrownBy(() -> Price.from(null))
+        assertThatThrownBy(() -> Price.from((Long) null))
                 .isInstanceOf(ProductException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ProductErrorCode.PRICE_CANNOT_BE_NULL);
     }

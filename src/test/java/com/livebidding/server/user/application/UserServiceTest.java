@@ -63,7 +63,7 @@ class UserServiceTest {
             userService.signup(request);
 
             // then
-            verify(userRepository).save(any(User.class));
+            verify(userRepository).saveAndFlush(any(User.class));
         }
 
         @Test
