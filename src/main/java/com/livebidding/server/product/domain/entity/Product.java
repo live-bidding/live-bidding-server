@@ -68,12 +68,8 @@ public class Product {
 
     private Product(String name, String description, BigDecimal startPrice,
                     LocalDateTime auctionStartTime, LocalDateTime auctionEndTime,
-                    User seller, boolean skipTimeValidation) {
-        if (skipTimeValidation) {
-            validateBasic(name, startPrice, auctionStartTime, auctionEndTime);
-        } else {
-            validate(name, startPrice, auctionStartTime, auctionEndTime);
-        }
+                    User seller) {
+        validate(name, startPrice, auctionStartTime, auctionEndTime);
 
         this.name = name;
         this.description = description;
@@ -88,13 +84,7 @@ public class Product {
     public static Product of(String name, String description, BigDecimal startPrice,
                              LocalDateTime auctionStartTime, LocalDateTime auctionEndTime,
                              User seller) {
-        return new Product(name, description, startPrice, auctionStartTime, auctionEndTime, seller, false);
-    }
-
-    public static Product ofForTest(String name, String description, BigDecimal startPrice,
-                                    LocalDateTime auctionStartTime, LocalDateTime auctionEndTime,
-                                    User seller) {
-        return new Product(name, description, startPrice, auctionStartTime, auctionEndTime, seller, true);
+        return new Product(name, description, startPrice, auctionStartTime, auctionEndTime, seller);
     }
 
     private void validate(String name, BigDecimal startPrice,

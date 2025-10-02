@@ -2,10 +2,10 @@ package com.livebidding.server.support;
 
 import com.livebidding.server.product.domain.entity.Product;
 import com.livebidding.server.user.domain.entity.User;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class TestFixture {
 
@@ -32,7 +32,7 @@ public class TestFixture {
     }
 
     public static Product createInProgressProduct(User seller) {
-        return Product.ofForTest(
+        return createProductWithReflection(
                 "진행중 상품",
                 "경매 진행중인 상품",
                 new BigDecimal("100000"),
@@ -54,7 +54,7 @@ public class TestFixture {
     }
 
     public static Product createEndedProduct(User seller) {
-        return Product.ofForTest(
+        return createProductWithReflection(
                 "종료된 상품",
                 "경매 종료된 상품",
                 new BigDecimal("100000"),
@@ -73,8 +73,32 @@ public class TestFixture {
             User seller
     ) {
         if (auctionStartTime.isBefore(LocalDateTime.now())) {
-            return Product.ofForTest(name, description, startPrice, auctionStartTime, auctionEndTime, seller);
+            return createProductWithReflection(name, description, startPrice, auctionStartTime, auctionEndTime, seller);
         }
         return Product.of(name, description, startPrice, auctionStartTime, auctionEndTime, seller);
+    }
+
+    private static Product createProductWithReflection(
+            String name,
+            String description,
+            BigDecimal startPrice,
+            LocalDateTime auctionStartTime,
+            LocalDateTime auctionEndTime,
+            User seller
+    ) {
+        try {
+            Constructor<Product> constructor = Product.class.getDeclaredConstructor(
+                    String.class,
+                    String.class,
+                    BigDecimal.class,
+                    LocalDateTime.class,
+                    LocalDateTime.class,
+                    User.class
+            );
+            constructor.setAccessible(true);
+            return constructor.newInstance(name, description, startPrice, auctionStartTime, auctionEndTime, seller);
+        } catch (Exception e) {
+            throw new RuntimeException("테스트용 Product 생성 실패", e);
+        }
     }
 }
