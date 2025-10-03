@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -56,7 +57,6 @@ class UserServiceTest {
         void signup_success() {
             // given
             SignupRequest request = new SignupRequest("test@test.com", "password123", "testuser");
-            given(userRepository.existsByEmail(any(Email.class))).willReturn(false);
             given(passwordEncoder.encode(request.password())).willReturn("$2a$10$N9qo8uLOickgx2ZMRZoMye.aA.w.dTBxI1s/oSp5kL182bGRfB0Fi");
 
             // when
@@ -71,7 +71,9 @@ class UserServiceTest {
         void signup_fail_duplicate_email() {
             // given
             SignupRequest request = new SignupRequest("test@test.com", "password123", "testuser");
-            given(userRepository.existsByEmail(any(Email.class))).willReturn(true);
+            given(passwordEncoder.encode(request.password())).willReturn("$2a$10$N9qo8uLOickgx2ZMRZoMye.aA.w.dTBxI1s/oSp5kL182bGRfB0Fi");
+            given(userRepository.saveAndFlush(any(User.class)))
+                    .willThrow(new DataIntegrityViolationException("Duplicate entry 'test@test.com' for key 'email'"));
 
             // when & then
             assertThatThrownBy(() -> userService.signup(request))
