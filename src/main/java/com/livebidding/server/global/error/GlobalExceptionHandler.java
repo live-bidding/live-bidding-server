@@ -1,5 +1,6 @@
 package com.livebidding.server.global.error;
 
+import com.livebidding.server.auth.exception.AuthErrorCode;
 import com.livebidding.server.product.exception.ProductException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,19 +69,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthorizationDeniedException.class)
     protected ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
         log.warn(">> 인증 실패: 로그인이 필요합니다.");
-        return new ResponseEntity<>(
-                new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), "[ERROR] 인증이 필요합니다."),
-                HttpStatus.UNAUTHORIZED
-        );
+        return createResponseEntity(AuthErrorCode.AUTHENTICATION_REQUIRED);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     protected ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
         log.warn(">> 권한 부족: 접근 권한이 없습니다.");
-        return new ResponseEntity<>(
-                new ErrorResponse(HttpStatus.FORBIDDEN.value(), "[ERROR] 접근 권한이 없습니다."),
-                HttpStatus.FORBIDDEN
-        );
+        return createResponseEntity(AuthErrorCode.ACCESS_DENIED);
     }
 
     @ExceptionHandler(Exception.class)
