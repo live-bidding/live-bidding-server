@@ -30,7 +30,7 @@ public class ProductName {
 
     private void validate(final String value) {
         if (!StringUtils.hasText(value)) {
-            throw new ProductException(ProductErrorCode.EMPTY_PRODUCT_NAME);
+            throw new ProductException(ProductErrorCode.BLANK_PRODUCT_NAME);
         }
     }
 }
