@@ -104,7 +104,7 @@ public class Product {
         if (!StringUtils.hasText(description)) {
             throw new ProductException(ProductErrorCode.EMPTY_PRODUCT_DESCRIPTION);
         }
-        if (startPrice == null || startPrice.compareTo(BigDecimal.ZERO) <= 0) {
+        if (startPrice == null || startPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new ProductException(ProductErrorCode.INVALID_PRICE);
         }
         if (auctionStartTime == null || auctionEndTime == null) {
