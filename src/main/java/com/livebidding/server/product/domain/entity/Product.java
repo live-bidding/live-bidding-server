@@ -69,7 +69,7 @@ public class Product {
     private Product(String name, String description, BigDecimal startPrice,
                     LocalDateTime auctionStartTime, LocalDateTime auctionEndTime,
                     User seller) {
-        validate(name, startPrice, auctionStartTime, auctionEndTime);
+        validate(name, description, startPrice, auctionStartTime, auctionEndTime);
 
         this.name = name;
         this.description = description;
@@ -87,19 +87,22 @@ public class Product {
         return new Product(name, description, startPrice, auctionStartTime, auctionEndTime, seller);
     }
 
-    private void validate(String name, BigDecimal startPrice,
+    private void validate(String name, String description, BigDecimal startPrice,
                           LocalDateTime auctionStartTime, LocalDateTime auctionEndTime) {
-        validateBasic(name, startPrice, auctionStartTime, auctionEndTime);
+        validateBasic(name, description, startPrice, auctionStartTime, auctionEndTime);
 
         if (auctionStartTime.isBefore(LocalDateTime.now())) {
             throw new ProductException(ProductErrorCode.INVALID_AUCTION_TIME);
         }
     }
 
-    private void validateBasic(String name, BigDecimal startPrice,
+    private void validateBasic(String name, String description, BigDecimal startPrice,
                                LocalDateTime auctionStartTime, LocalDateTime auctionEndTime) {
         if (!StringUtils.hasText(name)) {
             throw new ProductException(ProductErrorCode.BLANK_PRODUCT_NAME);
+        }
+        if (!StringUtils.hasText(description)) {
+            throw new ProductException(ProductErrorCode.EMPTY_PRODUCT_DESCRIPTION);
         }
         if (startPrice == null || startPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new ProductException(ProductErrorCode.INVALID_PRICE);
@@ -107,8 +110,8 @@ public class Product {
         if (auctionStartTime == null || auctionEndTime == null) {
             throw new ProductException(ProductErrorCode.INVALID_AUCTION_TIME);
         }
-        if (auctionEndTime.isBefore(auctionStartTime)) {
-            throw new ProductException(ProductErrorCode.INVALID_AUCTION_TIME);
+        if (!auctionEndTime.isAfter(auctionStartTime)) {
+            throw new ProductException(ProductErrorCode.INVALID_AUCTION_PERIOD);
         }
     }
 
