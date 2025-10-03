@@ -42,7 +42,7 @@ public class Price {
         }
     }
 
-    public Long getValue() {
-        return value.longValue();
+    public BigDecimal getValue() {
+        return value;
     }
 }
