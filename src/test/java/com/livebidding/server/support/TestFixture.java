@@ -1,8 +1,10 @@
 package com.livebidding.server.support;
 
 import com.livebidding.server.product.domain.entity.Product;
+import com.livebidding.server.product.domain.type.AuctionStatus;
 import com.livebidding.server.user.domain.entity.User;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -79,26 +81,40 @@ public class TestFixture {
     }
 
     private static Product createProductWithReflection(
-            String name,
-            String description,
-            BigDecimal startPrice,
-            LocalDateTime auctionStartTime,
-            LocalDateTime auctionEndTime,
-            User seller
-    ) {
+            String name, String description, BigDecimal startPrice,
+            LocalDateTime auctionStartTime, LocalDateTime auctionEndTime, User seller) {
         try {
-            Constructor<Product> constructor = Product.class.getDeclaredConstructor(
-                    String.class,
-                    String.class,
-                    BigDecimal.class,
-                    LocalDateTime.class,
-                    LocalDateTime.class,
-                    User.class
-            );
+            Constructor<Product> constructor = Product.class.getDeclaredConstructor();
             constructor.setAccessible(true);
-            return constructor.newInstance(name, description, startPrice, auctionStartTime, auctionEndTime, seller);
+            Product product = constructor.newInstance();
+            setField(product, "name", name);
+            setField(product, "description", description);
+            setField(product, "startPrice", startPrice);
+            setField(product, "currentPrice", startPrice);
+            setField(product, "auctionStartTime", auctionStartTime);
+            setField(product, "auctionEndTime", auctionEndTime);
+            setField(product, "status", determineStatus(auctionStartTime, auctionEndTime));
+            setField(product, "seller", seller);
+            return product;
         } catch (Exception e) {
             throw new RuntimeException("테스트용 Product 생성 실패", e);
         }
+    }
+
+    private static void setField(Product product, String fieldName, Object value) throws Exception {
+        Field field = Product.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(product, value);
+    }
+
+    private static AuctionStatus determineStatus(LocalDateTime auctionStartTime, LocalDateTime auctionEndTime) {
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(auctionStartTime)) {
+            return AuctionStatus.SCHEDULED;
+        }
+        if (now.isBefore(auctionEndTime)) {
+            return AuctionStatus.IN_PROGRESS;
+        }
+        return AuctionStatus.ENDED;
     }
 }
