@@ -73,7 +73,10 @@ public class ProductService {
         if (status == AuctionStatus.IN_PROGRESS) {
             return productRepository.findInProgress(now, pageable);
         }
-        return productRepository.findEnded(now, pageable);
+        if (status == AuctionStatus.ENDED) {
+            return productRepository.findEnded(now, pageable);
+        }
+        throw new ProductException(ProductErrorCode.UNSUPPORTED_AUCTION_STATUS);
     }
 
     public ProductDetailResponse getProductDetail(Long productId) {
