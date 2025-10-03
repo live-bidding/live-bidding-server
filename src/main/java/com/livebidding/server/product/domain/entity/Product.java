@@ -50,8 +50,7 @@ public class Product {
 
     private LocalDateTime auctionEndTime;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Transient
     private AuctionStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -78,13 +77,23 @@ public class Product {
         this.auctionStartTime = auctionStartTime;
         this.auctionEndTime = auctionEndTime;
         this.seller = seller;
-        this.status = determineStatus(LocalDateTime.now(), auctionStartTime, auctionEndTime);
     }
 
     public static Product of(String name, String description, BigDecimal startPrice,
                              LocalDateTime auctionStartTime, LocalDateTime auctionEndTime,
                              User seller) {
         return new Product(name, description, startPrice, auctionStartTime, auctionEndTime, seller);
+    }
+
+    public AuctionStatus getStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(auctionStartTime)) {
+            return AuctionStatus.SCHEDULED;
+        }
+        if (now.isBefore(auctionEndTime)) {
+            return AuctionStatus.IN_PROGRESS;
+        }
+        return AuctionStatus.ENDED;
     }
 
     private void validate(String name, String description, BigDecimal startPrice,
@@ -101,9 +110,6 @@ public class Product {
         if (!StringUtils.hasText(name)) {
             throw new ProductException(ProductErrorCode.BLANK_PRODUCT_NAME);
         }
-        if (!StringUtils.hasText(description)) {
-            throw new ProductException(ProductErrorCode.EMPTY_PRODUCT_DESCRIPTION);
-        }
         if (startPrice == null || startPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new ProductException(ProductErrorCode.INVALID_PRICE);
         }
@@ -113,15 +119,5 @@ public class Product {
         if (!auctionEndTime.isAfter(auctionStartTime)) {
             throw new ProductException(ProductErrorCode.INVALID_AUCTION_PERIOD);
         }
-    }
-
-    private AuctionStatus determineStatus(LocalDateTime now, LocalDateTime startTime, LocalDateTime endTime) {
-        if (now.isBefore(startTime)) {
-            return AuctionStatus.SCHEDULED;
-        }
-        if (now.isBefore(endTime)) {
-            return AuctionStatus.IN_PROGRESS;
-        }
-        return AuctionStatus.ENDED;
     }
 }

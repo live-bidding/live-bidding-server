@@ -14,5 +14,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p JOIN FETCH p.seller WHERE p.id = :id")
     Optional<Product> findByIdWithSeller(@Param("id") Long id);
 
-    Page<Product> findAllByStatus(AuctionStatus status, Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE :now < p.auctionStartTime")
+    Page<Product> findScheduled(@Param("now") LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE :now BETWEEN p.auctionStartTime AND p.auctionEndTime")
+    Page<Product> findInProgress(@Param("now") LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE :now > p.auctionEndTime")
+    Page<Product> findEnded(@Param("now") LocalDateTime now, Pageable pageable);
 }

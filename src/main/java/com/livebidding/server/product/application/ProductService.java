@@ -50,16 +50,21 @@ public class ProductService {
 
     public Page<ProductSummaryResponse> getProducts(AuctionStatus status, Pageable pageable) {
         if (pageable.getPageSize() > MAX_PAGE_SIZE) {
-            throw new GlobalException(GlobalErrorCode.PAGE_SIZE_EXCEEDED);
+            throw new BaseException(GlobalErrorCode.PAGE_SIZE_EXCEEDED);
         }
 
-        if (status != null) {
-            return productRepository.findAllByStatus(status, pageable)
+        if (status == null) {
+            return productRepository.findAll(pageable)
                     .map(ProductSummaryResponse::from);
         }
 
-        return productRepository.findAll(pageable)
-                .map(ProductSummaryResponse::from);
+        LocalDateTime now = LocalDateTime.now();
+        Page<Product> products = switch (status) {
+            case SCHEDULED -> productRepository.findScheduled(now, pageable);
+            case IN_PROGRESS -> productRepository.findInProgress(now, pageable);
+            case ENDED -> productRepository.findEnded(now, pageable);
+        };
+        return products.map(ProductSummaryResponse::from);
     }
 
     public ProductDetailResponse getProductDetail(Long productId) {
