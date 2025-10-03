@@ -7,14 +7,13 @@ import com.livebidding.server.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -22,7 +21,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.util.StringUtils;
 
@@ -47,8 +45,10 @@ public class Product {
     @Column(nullable = false)
     private BigDecimal currentPrice;
 
+    @Column(nullable = false)
     private LocalDateTime auctionStartTime;
 
+    @Column(nullable = false)
     private LocalDateTime auctionEndTime;
 
     @Transient
@@ -69,7 +69,7 @@ public class Product {
     private Product(String name, String description, BigDecimal startPrice,
                     LocalDateTime auctionStartTime, LocalDateTime auctionEndTime,
                     User seller) {
-        validate(name, description, startPrice, auctionStartTime, auctionEndTime);
+        validate(name, startPrice, auctionStartTime, auctionEndTime);
 
         this.name = name;
         this.description = description;
@@ -97,21 +97,21 @@ public class Product {
         return AuctionStatus.ENDED;
     }
 
-    private void validate(String name, String description, BigDecimal startPrice,
+    private void validate(String name, BigDecimal startPrice,
                           LocalDateTime auctionStartTime, LocalDateTime auctionEndTime) {
-        validateBasic(name, description, startPrice, auctionStartTime, auctionEndTime);
+        validateBasic(name, startPrice, auctionStartTime, auctionEndTime);
 
         if (auctionStartTime.isBefore(LocalDateTime.now())) {
             throw new ProductException(ProductErrorCode.INVALID_AUCTION_TIME);
         }
     }
 
-    private void validateBasic(String name, String description, BigDecimal startPrice,
+    private void validateBasic(String name, BigDecimal startPrice,
                                LocalDateTime auctionStartTime, LocalDateTime auctionEndTime) {
         if (!StringUtils.hasText(name)) {
             throw new ProductException(ProductErrorCode.BLANK_PRODUCT_NAME);
         }
-        if (startPrice == null || startPrice.compareTo(BigDecimal.ZERO) < 0) {
+        if (startPrice == null || startPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new ProductException(ProductErrorCode.INVALID_PRICE);
         }
         if (auctionStartTime == null || auctionEndTime == null) {

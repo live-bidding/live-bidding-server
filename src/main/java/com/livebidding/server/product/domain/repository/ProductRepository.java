@@ -1,8 +1,6 @@
 package com.livebidding.server.product.domain.repository;
 
 import com.livebidding.server.product.domain.entity.Product;
-import com.livebidding.server.product.domain.type.AuctionStatus;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -19,9 +17,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE :now < p.auctionStartTime")
     Page<Product> findScheduled(@Param("now") LocalDateTime now, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE :now BETWEEN p.auctionStartTime AND p.auctionEndTime")
+    @Query("SELECT p FROM Product p WHERE :now >= p.auctionStartTime AND :now < p.auctionEndTime")
     Page<Product> findInProgress(@Param("now") LocalDateTime now, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE :now > p.auctionEndTime")
+    @Query("SELECT p FROM Product p WHERE :now >= p.auctionEndTime")
     Page<Product> findEnded(@Param("now") LocalDateTime now, Pageable pageable);
 }
