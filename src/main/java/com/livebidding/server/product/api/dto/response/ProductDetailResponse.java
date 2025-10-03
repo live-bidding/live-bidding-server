@@ -16,8 +16,7 @@ public record ProductDetailResponse(
         LocalDateTime auctionStartTime,
         LocalDateTime auctionEndTime,
         AuctionStatus status,
-        SellerResponse seller,
-        List<?> bids // 1.3 입찰 기능 구현 후, 실제 입찰 내역 DTO로 변경 예정
+        SellerResponse seller
 ) {
     public static ProductDetailResponse from(Product product) {
         return new ProductDetailResponse(
@@ -29,8 +28,7 @@ public record ProductDetailResponse(
                 product.getAuctionStartTime(),
                 product.getAuctionEndTime(),
                 product.getStatus(),
-                SellerResponse.from(product.getSeller()),
-                Collections.emptyList() // 현재는 빈 리스트 반환
+                SellerResponse.from(product.getSeller())
         );
     }
 }
