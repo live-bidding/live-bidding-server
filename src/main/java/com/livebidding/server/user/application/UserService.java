@@ -12,8 +12,8 @@ import com.livebidding.server.user.domain.vo.Email;
 import com.livebidding.server.user.exception.UserErrorCode;
 import com.livebidding.server.user.exception.UserException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -45,11 +45,7 @@ public class UserService {
             String accessToken = jwtTokenProvider.createAccessToken(authentication);
             String refreshTokenValue = jwtTokenProvider.createRefreshToken(authentication);
 
-            refreshTokenRepository.findByUserId(user.getId())
-                    .ifPresentOrElse(
-                            refreshToken -> refreshToken.updateToken(refreshTokenValue),
-                            () -> refreshTokenRepository.save(RefreshToken.of(user, refreshTokenValue))
-                    );
+            updateOrCreateRefreshToken(user, refreshTokenValue);
 
             return new TokenResponse(accessToken, refreshTokenValue);
         } catch (AuthenticationException e) {
@@ -57,13 +53,22 @@ public class UserService {
         }
     }
 
+    private void updateOrCreateRefreshToken(User user, String refreshTokenValue) {
+        refreshTokenRepository.findByUserId(user.getId())
+                .ifPresentOrElse(
+                        refreshToken -> refreshToken.updateToken(refreshTokenValue),
+                        () -> refreshTokenRepository.save(RefreshToken.of(user, refreshTokenValue))
+                );
+    }
+
     @Transactional
     public void signup(SignupRequest request) {
-        if (userRepository.existsByEmail(Email.from(request.email()))) {
-            throw new UserException(UserErrorCode.DUPLICATE_EMAIL);
+        try {
+            String encodedPassword = passwordEncoder.encode(request.password());
+            User user = User.of(request.email(), encodedPassword, request.name());
+            userRepository.saveAndFlush(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new UserException(UserErrorCode.DUPLICATE_EMAIL, e);
         }
-        String encodedPassword = passwordEncoder.encode(request.password());
-        User user = User.of(request.email(), encodedPassword, request.name());
-        userRepository.save(user);
     }
 }

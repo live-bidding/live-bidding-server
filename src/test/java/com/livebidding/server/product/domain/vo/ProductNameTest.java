@@ -29,7 +29,7 @@ class ProductNameTest {
         // when & then
         assertThatThrownBy(() -> ProductName.from(""))
                 .isInstanceOf(ProductException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ProductErrorCode.EMPTY_PRODUCT_NAME);
+                .hasFieldOrPropertyWithValue("errorCode", ProductErrorCode.BLANK_PRODUCT_NAME);
     }
 
     @Test

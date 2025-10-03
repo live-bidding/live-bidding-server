@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.livebidding.server.product.exception.ProductErrorCode;
 import com.livebidding.server.product.exception.ProductException;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,14 +16,13 @@ class PriceTest {
         // when
         Price price = Price.from(1000L);
         // then
-        assertThat(price.getValue()).isEqualTo(1000L);
+        assertThat(price.getValue()).isEqualTo(new BigDecimal("1000"));
     }
 
     @Test
     @DisplayName("가격이 null일 경우 ProductException을 던진다.")
     void throw_exception_when_price_is_null() {
-        // when & then
-        assertThatThrownBy(() -> Price.from(null))
+        assertThatThrownBy(() -> Price.from((Long) null))
                 .isInstanceOf(ProductException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ProductErrorCode.PRICE_CANNOT_BE_NULL);
     }

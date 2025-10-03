@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.livebidding.server.auth.jwt.JwtTokenProvider;
-import com.livebidding.server.global.config.SecurityConfig;
 import com.livebidding.server.user.api.dto.request.LoginRequest;
 import com.livebidding.server.user.api.dto.request.SignupRequest;
 import com.livebidding.server.user.api.dto.response.TokenResponse;
@@ -18,15 +17,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = UserController.class)
-@Import(SecurityConfig.class)
+@ActiveProfiles("test")
+@AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {
 
     @Autowired
@@ -38,14 +38,11 @@ class UserControllerTest {
     @MockitoBean
     private UserService userService;
 
-    @MockitoBean
+    @MockitoBean  // 추가
     private JwtTokenProvider jwtTokenProvider;
 
-    @MockitoBean
-    private UserDetailsService userDetailsService;
-
     @Nested
-    @DisplayName("/api/users/signup 요청 시")
+    @DisplayName("/api/v1/users/signup 요청 시")
     class Signup {
         @Test
         @DisplayName("성공하면 201 Created를 반환한다")
@@ -54,7 +51,7 @@ class UserControllerTest {
             SignupRequest request = new SignupRequest("test@test.com", "password123", "testuser");
 
             // when & then
-            mockMvc.perform(post("/api/users/signup")
+            mockMvc.perform(post("/api/v1/users/signup")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated())
@@ -68,7 +65,7 @@ class UserControllerTest {
             SignupRequest request = new SignupRequest("", "password123", "testuser");
 
             // when & then
-            mockMvc.perform(post("/api/users/signup")
+            mockMvc.perform(post("/api/v1/users/signup")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -77,7 +74,7 @@ class UserControllerTest {
     }
 
     @Nested
-    @DisplayName("/api/users/login 요청 시")
+    @DisplayName("/api/v1/users/login 요청 시")
     class Login {
         @Test
         @DisplayName("성공하면 200 OK와 함께 토큰을 반환한다")
@@ -88,7 +85,7 @@ class UserControllerTest {
             given(userService.login(any(LoginRequest.class))).willReturn(tokenResponse);
 
             // when & then
-            mockMvc.perform(post("/api/users/login")
+            mockMvc.perform(post("/api/v1/users/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
