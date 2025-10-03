@@ -63,9 +63,6 @@ public class UserService {
 
     @Transactional
     public void signup(SignupRequest request) {
-        if (userRepository.existsByEmail(Email.from(request.email()))) {
-            throw new UserException(UserErrorCode.DUPLICATE_EMAIL);
-        }
         try {
             String encodedPassword = passwordEncoder.encode(request.password());
             User user = User.of(request.email(), encodedPassword, request.name());
