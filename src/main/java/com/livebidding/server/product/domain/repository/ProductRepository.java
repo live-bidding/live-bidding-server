@@ -2,6 +2,8 @@ package com.livebidding.server.product.domain.repository;
 
 import com.livebidding.server.product.domain.entity.Product;
 import com.livebidding.server.product.domain.type.AuctionStatus;
+
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

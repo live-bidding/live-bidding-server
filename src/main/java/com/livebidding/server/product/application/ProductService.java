@@ -1,5 +1,6 @@
 package com.livebidding.server.product.application;
 
+import com.livebidding.server.global.error.BaseException;
 import com.livebidding.server.global.error.GlobalErrorCode;
 import com.livebidding.server.global.error.GlobalException;
 import com.livebidding.server.product.api.dto.request.ProductCreateRequest;
@@ -20,6 +21,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +53,7 @@ public class ProductService {
 
     public Page<ProductSummaryResponse> getProducts(AuctionStatus status, Pageable pageable) {
         if (pageable.getPageSize() > MAX_PAGE_SIZE) {
-            throw new BaseException(GlobalErrorCode.PAGE_SIZE_EXCEEDED);
+            throw new GlobalException(GlobalErrorCode.PAGE_SIZE_EXCEEDED);
         }
 
         if (status == null) {
