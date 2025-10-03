@@ -2,7 +2,6 @@ package com.livebidding.server.product.api;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -67,7 +66,7 @@ class ProductControllerTest {
     @DisplayName("인증된 사용자는 상품 등록에 성공한다.")
     void createProductSuccess() throws Exception {
         // given
-        ProductCreateRequest request = new ProductCreateRequest("test product", "desc", BigDecimal.valueOf(1000), LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2));
+        ProductCreateRequest request = new ProductCreateRequest("test product", "desc", BigDecimal.valueOf(1000), LocalDateTime.of(2025, 10, 10, 10, 0), LocalDateTime.of(2025, 10, 11, 10, 0));
 
         // when & then
         mockMvc.perform(post("/api/v1/products")
@@ -82,7 +81,7 @@ class ProductControllerTest {
     @DisplayName("로그인하지 않은 사용자는 상품 등록에 실패한다. (401 Unauthorized)")
     void createProductFail_Unauthorized() throws Exception {
         // given
-        ProductCreateRequest request = new ProductCreateRequest("test product", "desc", BigDecimal.valueOf(1000), LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2));
+        ProductCreateRequest request = new ProductCreateRequest("test product", "desc", BigDecimal.valueOf(1000), LocalDateTime.of(2025, 10, 10, 10, 0), LocalDateTime.of(2025, 10, 11, 10, 0));
 
         // when & then
         mockMvc.perform(post("/api/v1/products")
