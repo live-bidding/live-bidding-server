@@ -62,12 +62,18 @@ public class ProductService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        Page<Product> products = switch (status) {
-            case SCHEDULED -> productRepository.findScheduled(now, pageable);
-            case IN_PROGRESS -> productRepository.findInProgress(now, pageable);
-            case ENDED -> productRepository.findEnded(now, pageable);
-        };
+        Page<Product> products = findProductsByStatus(status, now, pageable);
         return products.map(ProductSummaryResponse::from);
+    }
+
+    private Page<Product> findProductsByStatus(AuctionStatus status, LocalDateTime now, Pageable pageable) {
+        if (status == AuctionStatus.SCHEDULED) {
+            return productRepository.findScheduled(now, pageable);
+        }
+        if (status == AuctionStatus.IN_PROGRESS) {
+            return productRepository.findInProgress(now, pageable);
+        }
+        return productRepository.findEnded(now, pageable);
     }
 
     public ProductDetailResponse getProductDetail(Long productId) {
